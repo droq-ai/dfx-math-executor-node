@@ -1,81 +1,73 @@
-# Droq Node Template
+# Droq Math Executor Node
 
-A Python template for building Droq nodes. Works with any Python code - minimal updates needed.
+A simple executor node for basic math operations in the Droq workflow engine, using the **dfx (Droqflow Executor)** framework.
 
-## Quick Start
+## dfx Framework
+
+The **dfx** framework is a standalone Python framework for building non-Langflow components. It provides:
+
+- **Component**: Base class for all components
+- **Data**: Data structure for component outputs
+- **Inputs**: `FloatInput`, `IntInput`, `StrInput`
+- **Outputs**: `Output` class for defining component outputs
+- **NATS**: NATS client for stream-based communication
+
+## Components
+
+### DFXMultiplyComponent
+
+A simple component that multiplies two numbers.
+
+**Inputs:**
+- `number1` (Float): First number
+- `number2` (Float): Second number
+
+**Outputs:**
+- `result` (Data): Product of the two numbers
+
+## Running Locally
 
 ```bash
-# 1. Clone and setup
-git clone <repository-url>
-cd droq-node-template-py
+# Install dependencies
 uv sync
 
-# 2. Replace src/node/main.py with your code
-
-# 3. Add dependencies
-uv add your-package
-
-# 4. Test locally
-PYTHONPATH=src uv run python -m node.main
-# or
-docker compose up
-
-# 5. Build
-docker build -t your-node:latest .
+# Run the service
+uv run droq-math-executor-node 8003
 ```
 
-## Documentation
+## API
 
-- [Usage Guide](docs/usage.md) - How to use the template
-- [NATS Examples](docs/nats.md) - NATS publishing and consuming examples
+- `GET /health` - Health check
+- `GET /` - Service info
+- `POST /api/v1/execute` - Execute a component method
 
-## Development
+## Example Usage
 
-```bash
-# Run tests
-PYTHONPATH=src uv run pytest
-
-# Format code
-uv run black src/ tests/
-uv run ruff check src/ tests/
-
-# Add dependencies
-uv add package-name
+```python
+# Execute MultiplyComponent
+POST /api/v1/execute
+{
+    "component_state": {
+        "component_class": "DFXMultiplyComponent",
+        "component_module": "dfx.math.component.multiply",
+        "parameters": {
+            "number1": 5.0,
+            "number2": 3.0
+        }
+    },
+    "method_name": "multiply",
+    "is_async": false
+}
 ```
 
-## Docker
+## Architecture
 
-```bash
-# Build
-docker build -t your-node:latest .
+This executor node uses the **dfx** framework, which is:
+- **Standalone**: No dependency on `lfx` (Langflow framework)
+- **Lightweight**: Minimal dependencies (Pydantic, FastAPI, NATS)
+- **Compatible**: Works with the Droq workflow engine backend
 
-# Run
-docker run --rm your-node:latest
-
-# Development (with hot reload)
-docker compose up
-```
-
-## Environment Variables
-
-Copy `.env.example` to `.env` and update with your values:
-
-```bash
-cp .env.example .env
-```
-
-Or set in `compose.yml` or pass to Docker:
-- `NATS_URL` - NATS server URL (default: `nats://localhost:4222`)
-- `STREAM_NAME` - JetStream name (default: `droq-stream`)
-- `NODE_NAME` - Node identifier
-- `LOG_LEVEL` - Logging level
-
-## Next Steps
-
-1. Test locally
-2. Build Docker image
-3. Register metadata in `droq-node-registry` (separate repo)
-
-## License
-
-Apache License 2.0
+Components built with dfx can be:
+- Executed in isolated executor nodes
+- Registered in the Droq registry service
+- Discovered and used in workflows via the editor
