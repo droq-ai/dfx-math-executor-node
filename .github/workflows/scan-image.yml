@@ -1,0 +1,101 @@
+name: Container Image Security Scan
+
+on:
+  schedule:
+    # Run daily at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: 'Image tag to scan (defaults to latest)'
+        required: false
+        default: 'latest'
+      image_ref:
+        description: 'Specific image reference (digest) to scan'
+        required: false
+        default: ''
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: droq-math-executor-node
+
+jobs:
+  scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    if: github.event.repository.is_public == true || github.event_name == 'workflow_dispatch'
+    permissions:
+      contents: read
+      security-events: write
+      packages: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Determine image to scan
+        id: image
+        run: |
+          if [[ -n "${{ github.event.inputs.image_ref }}" ]]; then
+            echo "image=${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}@${{ github.event.inputs.image_ref }}" >> $GITHUB_OUTPUT
+          else
+            TAG="${{ github.event.inputs.image_tag || 'latest' }}"
+            echo "image=${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}:${TAG}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ steps.image.outputs.image }}
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'
+          category: container-scan
+
+      - name: Generate security report
+        if: always()
+        run: |
+          echo "## Security Scan Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Image:** ${{ steps.image.outputs.image }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Date:** $(date -u)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ -f "trivy-results.sarif" ]; then
+            # Count vulnerabilities by severity
+            CRITICAL=$(cat trivy-results.sarif | jq '.results[].runs[0].results | map(select(.level == "error")) | length' 2>/dev/null || echo "0")
+            HIGH=$(cat trivy-results.sarif | jq '.results[].runs[0].results | map(select(.level == "warning")) | length' 2>/dev/null || echo "0")
+            MEDIUM=$(cat trivy-results.sarif | jq '.results[].runs[0].results | map(select(.level == "note")) | length' 2>/dev/null || echo "0")
+            LOW=$(cat trivy-results.sarif | jq '.results[].runs[0].results | map(select(.level == "info")) | length' 2>/dev/null || echo "0")
+
+            echo "| Severity | Count |" >> $GITHUB_STEP_SUMMARY
+            echo "|----------|-------|" >> $GITHUB_STEP_SUMMARY
+            echo "| 🔴 Critical | $CRITICAL |" >> $GITHUB_STEP_SUMMARY
+            echo "| 🟠 High | $HIGH |" >> $GITHUB_STEP_SUMMARY
+            echo "| 🟡 Medium | $MEDIUM |" >> $GITHUB_STEP_SUMMARY
+            echo "| 🔵 Low | $LOW |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ Scan failed or no results generated" >> $GITHUB_STEP_SUMMARY
+          fi
+
+  dependency-review:
+    name: Dependency Review
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Dependency Review
+        uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: moderate
