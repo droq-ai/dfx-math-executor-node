@@ -1,0 +1,18 @@
+services:
+  math-executor:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ${DFX_MATH_EXE_CONTAINER_NAME:-droq-math-executor-node}
+    environment:
+      - HOST=${DFX_MATH_EXE_HOST:-0.0.0.0}
+      - PORT=${DFX_MATH_EXE_CONTAINER_PORT:-8003}
+      - LOG_LEVEL=${DFX_MATH_EXE_LOG_LEVEL:-INFO}
+    ports:
+      - "${DFX_MATH_EXE_HOST_PORT:-8003}:${DFX_MATH_EXE_CONTAINER_PORT:-8003}"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:${DFX_MATH_EXE_CONTAINER_PORT:-8003}/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
