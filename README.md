@@ -84,6 +84,14 @@ DFX_MATH_EXE_CONTAINER_NAME=droq-math-executor-node
 # Then restart: docker compose down && docker compose up -d
 ```
 
+### Required Permissions
+
+For the CI/CD to work with private registry, ensure:
+
+1. **Repository Settings**: Actions → General → "Read and write permissions" enabled
+2. **Organization Settings**: Packages → "Allow public packages for this organization" enabled
+3. **Team Access**: Grant team members access to private packages in organization settings
+
 ### Without Docker (Local Development)
 
 ```bash
@@ -163,13 +171,28 @@ This project uses GitHub Actions for automated CI/CD:
 
 ### Docker Registry
 
-Images are automatically published to **GitHub Container Registry (GHCR)**:
+Images are automatically published to **GitHub Container Registry (GHCR)** as **private packages**:
 
 ```bash
 # Organization registry (replace with your organization name)
 ghcr.io/droq/dfx-math-executor-node:latest
 ghcr.io/droq/dfx-math-executor-node:v1.0.0
 ghcr.io/droq/dfx-math-executor-node:main
+```
+
+#### Private Registry Access
+
+Since images are published to a private registry, you'll need to authenticate:
+
+```bash
+# Login to GitHub Container Registry
+echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+# Or use a personal access token
+docker login ghcr.io -u YOUR_USERNAME --password-stdin
+
+# Pull the private image
+docker pull ghcr.io/droq/dfx-math-executor-node:latest
 ```
 
 ### Pulling from Registry
