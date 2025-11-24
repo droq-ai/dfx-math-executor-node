@@ -1,12 +1,13 @@
 """Input types for dfx framework."""
 
 from typing import Any
+
 from pydantic import BaseModel, Field, field_validator
 
 
 class BaseInput(BaseModel):
     """Base input class."""
-    
+
     name: str
     display_name: str
     info: str = ""
@@ -17,10 +18,10 @@ class BaseInput(BaseModel):
 
 class FloatInput(BaseInput):
     """Float input field."""
-    
+
     field_type: str = "float"
     value: float = Field(default=0.0)
-    
+
     @field_validator("value")
     @classmethod
     def validate_value(cls, v: Any) -> float:
@@ -37,10 +38,10 @@ class FloatInput(BaseInput):
 
 class IntInput(BaseInput):
     """Integer input field."""
-    
+
     field_type: str = "int"
     value: int = Field(default=0)
-    
+
     @field_validator("value")
     @classmethod
     def validate_value(cls, v: Any) -> int:
@@ -57,10 +58,10 @@ class IntInput(BaseInput):
 
 class StrInput(BaseInput):
     """String input field."""
-    
+
     field_type: str = "str"
     value: str = Field(default="")
-    
+
     @field_validator("value")
     @classmethod
     def validate_value(cls, v: Any) -> str:

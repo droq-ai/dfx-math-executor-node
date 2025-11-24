@@ -40,6 +40,7 @@ classifiers = [
 dev = [
     "pytest>=7.0.0",
     "pytest-cov>=4.0.0",
+    "pytest-asyncio>=0.21.0",
     "ruff>=0.1.0",
     "mypy>=1.0.0",
     "types-requests>=2.31.0",
@@ -75,6 +76,10 @@ testpaths = ["tests"]
 python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
+addopts = "--tb=short"
+markers = [
+    "asyncio: marks tests as async",
+]
 
 [tool.mypy]
 python_version = "3.9"
@@ -86,6 +91,7 @@ disallow_untyped_defs = false
 dev = [
     "mypy>=1.14.1",
     "pytest>=8.3.5",
+    "pytest-asyncio>=0.24.0",
     "pytest-cov>=5.0.0",
     "pyyaml>=6.0.3",
     "ruff>=0.14.3",
