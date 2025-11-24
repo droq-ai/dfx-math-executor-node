@@ -1,205 +1,22 @@
 {
-  "did": "did:droq:node:droq-math-executor-node-v1",
-  "publicKey": "TBD_GENERATE_AT_RUNTIME",
-  "privateKey": "TBD_GENERATE_AT_RUNTIME",
-  "node_type": "executor",
-  "name": "Droq Math Executor Node",
-  "description": "DroqFlow math operations executor with REST API and NATS streaming - provides mathematical computation capabilities for workflows",
+  "node_id": "dfx-math-executor-node",
+  "name": "Droq math multiply",
+  "description": "Droq DFX node that provides a component to multiply two numbers.",
   "version": "1.0.0",
-  "streams": {
-    "subscribe": [],
-    "publish": [
-      "streams.droq.droq-math-executor-node.local.public.results.*",
-      "droq.local.public.math.>"
-    ]
-  },
-  "permissions": {
-    "read": [],
-    "write": [
-      "streams.droq.droq-math-executor-node.local.public.results.*",
-      "droq.local.public.math.>"
-    ]
-  },
-  "dependencies": {
-    "external": [
-      {
-        "type": "nats",
-        "cluster": "local",
-        "stream": "droq-stream"
-      },
-      {
-        "type": "did-resolver",
-        "endpoint": "https://did.registry.droq.ai"
-      },
-      {
-        "type": "http-api",
-        "endpoint": "http://localhost:8003"
-      }
-    ]
-  },
-  "config": {
-    "description": "Math executor node providing computational operations for DroqFlow workflows",
-    "docker_image": "droq/droq-math-executor-node:v1",
-    "host": "0.0.0.0",
-    "port": 8003,
-    "log_level": "INFO",
-    "locality": "local",
-    "remote_endpoint": "nats://droq-nats-server:4222",
-    "default_timeout": 30,
-    "nats_url": "nats://localhost:4222",
-    "stream_name": "droq-stream"
-  },
-  "source_code": {
-    "path": "./src",
-    "type": "local",
-    "docker": {
-      "type": "file",
-      "dockerfile": "./Dockerfile"
+  "api_url": "http://localhost:8000",
+  "ip_address": "0.0.0.0",
+  "docker_image": "droq/langflow-executor:v1",
+  "deployment_location": "local",
+  "status": "active",
+  "author": "Dorq",
+  "created_at": "2025-11-23T00:00:00Z",
+  "source_code_location": "https://github.com/droq-ai/dfx-math-executor-node",
+    "components": {
+        "Multiply": {
+        "path": "dfx.math.component.multiply",
+        "description": "Multiplies two numbers together",
+          "display_name": "DFX Multiply",
+        "author": "Dorq"
+        }
     }
-  },
-  "components": {
-    "framework": {
-      "Component": {
-        "display_name": "DFX Base Component",
-        "description": "Base component class providing foundation for all components with input/output management, status tracking, and logging capabilities",
-        "category": "framework",
-        "icon": "component",
-        "type": "base_class"
-      },
-      "Data": {
-        "display_name": "DFX Data Container",
-        "description": "Flexible data container with attribute-like access and text extraction capabilities",
-        "category": "data_management",
-        "icon": "database",
-        "type": "data_structure"
-      },
-      "NATSClient": {
-        "display_name": "NATS Integration Client",
-        "description": "NATS client wrapper for message publishing with JetStream support and automatic stream management",
-        "category": "communication",
-        "icon": "stream",
-        "type": "integration"
-      }
-    },
-    "input_types": {
-      "FloatInput": {
-        "display_name": "Float Input",
-        "description": "Float input field with validation and type conversion",
-        "category": "validation",
-        "icon": "number"
-      },
-      "IntInput": {
-        "display_name": "Integer Input",
-        "description": "Integer input field with validation and type conversion",
-        "category": "validation",
-        "icon": "number"
-      },
-      "StrInput": {
-        "display_name": "String Input",
-        "description": "String input field with validation and normalization",
-        "category": "validation",
-        "icon": "text"
-      }
-    },
-    "math_operations": {
-      "DFXMultiplyComponent": {
-        "display_name": "DFX Multiply",
-        "description": "Multiply two numbers and return the product with comprehensive error handling",
-        "category": "math",
-        "icon": "calculator",
-        "name": "DFXMultiply",
-        "inputs": [
-          {
-            "name": "number1",
-            "type": "float",
-            "description": "The first number to multiply",
-            "default": 0.0,
-            "required": false
-          },
-          {
-            "name": "number2",
-            "type": "float",
-            "description": "The second number to multiply",
-            "default": 0.0,
-            "required": false
-          }
-        ],
-        "outputs": [
-          {
-            "name": "result",
-            "type": "data",
-            "description": "Product of the two numbers with metadata",
-            "method": "multiply"
-          }
-        ],
-        "methods": {
-          "multiply": {
-            "description": "Performs multiplication operation",
-            "parameters": ["number1", "number2"],
-            "returns": "Data object with product and input metadata"
-          }
-        },
-        "error_handling": true,
-        "logging": true,
-        "status_tracking": true
-      }
-    },
-    "api_endpoints": {
-      "execute": {
-        "display_name": "Component Executor",
-        "description": "HTTP endpoint for executing component methods with timeout handling",
-        "path": "/api/v1/execute",
-        "method": "POST",
-        "category": "api",
-        "icon": "play"
-      },
-      "health": {
-        "display_name": "Health Check",
-        "description": "Service health status endpoint",
-        "path": "/health",
-        "method": "GET",
-        "category": "api",
-        "icon": "health"
-      }
-    }
-  },
-  "features": {
-    "nats_integration": true,
-    "async_execution": true,
-    "timeout_support": true,
-    "error_handling": true,
-    "status_tracking": true,
-    "logging": true,
-    "component_validation": true,
-    "dynamic_component_loading": true
-  },
-  "examples": {
-    "basic_usage": {
-      "description": "Execute multiplication via HTTP API",
-      "endpoint": "/api/v1/execute",
-      "payload": {
-        "component_state": {
-          "component_class": "DFXMultiplyComponent",
-          "component_module": "dfx.math.component.multiply",
-          "parameters": {
-            "number1": 5.0,
-            "number2": 3.0
-          }
-        },
-        "method_name": "multiply",
-        "is_async": false
-      }
-    },
-    "health_check": {
-      "description": "Check service health",
-      "endpoint": "/health",
-      "method": "GET"
-    }
-  },
-  "development_info": {
-    "framework": "dfx (Droqflow Executor)",
-    "architecture": "Standalone, non-Langflow based",
-    "minimal_dependencies": ["Pydantic", "FastAPI", "NATS"],
-    "compatible_with": ["Droq workflow engine", "Droq registry service", "Droq workflow editor"]
-  }
 }
