@@ -1,9 +1,7 @@
 """Pytest configuration and fixtures for testing."""
 
 import os
-import subprocess
 import sys
-import time
 from pathlib import Path
 
 import pytest
