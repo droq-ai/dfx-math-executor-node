@@ -3,7 +3,7 @@
   "name": "Droq math multiply",
   "description": "Droq DFX node that provides a component to multiply two numbers.",
   "version": "1.0.0",
-  "api_url": "http://localhost:8000",
+  "api_url": "http://localhost:8003",
   "ip_address": "0.0.0.0",
   "docker_image": "droq/langflow-executor:v1",
   "deployment_location": "local",
