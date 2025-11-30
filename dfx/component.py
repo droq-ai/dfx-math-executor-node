@@ -2,9 +2,9 @@
 
 import logging
 from typing import Any
+
 from pydantic import BaseModel, ConfigDict
 
-from dfx.data import Data
 from dfx.inputs import BaseInput
 from dfx.outputs import Output
 
@@ -22,25 +22,25 @@ class Component(BaseModel):
     - inputs: List of Input objects
     - outputs: List of Output objects
     """
-    
+
     model_config = ConfigDict(extra="allow")  # Allow extra fields for dynamic input values
-    
+
     display_name: str = ""
     description: str = ""
     icon: str = ""
     name: str = ""
     inputs: list[BaseInput] = []
     outputs: list[Output] = []
-    
+
     # Internal state
     _status: str = ""
     _logs: list[str] = []
-    
+
     def __init__(self, **kwargs):
         """Initialize component with parameters."""
         # Extract config values (keys starting with _)
         config = {k: v for k, v in kwargs.items() if k.startswith("_")}
-        
+
         # Get class-level inputs/outputs if not provided in kwargs
         model_kwargs = {}
         if "inputs" not in kwargs and hasattr(self.__class__, "inputs"):
@@ -55,14 +55,14 @@ class Component(BaseModel):
             model_kwargs["icon"] = self.__class__.icon
         if "name" not in kwargs and hasattr(self.__class__, "name"):
             model_kwargs["name"] = self.__class__.name or self.__class__.__name__
-        
+
         # Merge with kwargs (this includes input values like number1, number2)
         # With extra="allow", Pydantic will accept these extra fields
         model_kwargs.update(kwargs)
-        
+
         # Initialize base model first (with all kwargs, including extra fields)
         super().__init__(**model_kwargs)
-        
+
         # Set default input values if not provided
         for input_def in self.inputs:
             input_name = input_def.name
@@ -78,30 +78,30 @@ class Component(BaseModel):
                             setattr(self, input_name, 0)
                         else:
                             setattr(self, input_name, "")
-        
+
         # Store config
         self._config = config
-        
+
         # Initialize status
         self._status = ""
         self._logs = []
-    
+
     @property
     def status(self) -> str:
         """Get component status."""
         return self._status
-    
+
     @status.setter
     def status(self, value: str) -> None:
         """Set component status."""
         self._status = str(value)
-    
+
     def log(self, message: str) -> None:
         """Log a message."""
         log_msg = f"[{self.__class__.__name__}] {message}"
         self._logs.append(log_msg)
         logger.info(log_msg)
-    
+
     def build(self) -> Any:
         """Build method - should be overridden by subclasses.
         

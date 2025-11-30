@@ -9,12 +9,12 @@ class DFXMultiplyComponent(Component):
     This is a simple component that takes two numbers as input
     and returns their product.
     """
-    
+
     display_name: str = "DFX Multiply"
     description: str = "Multiply two numbers and return the product."
     icon: str = "calculator"
     name: str = "DFXMultiply"
-    
+
     inputs: list = [
         FloatInput(
             name="number1",
@@ -29,7 +29,7 @@ class DFXMultiplyComponent(Component):
             value=0.0,
         ),
     ]
-    
+
     outputs: list = [
         Output(
             display_name="Product",
@@ -38,7 +38,7 @@ class DFXMultiplyComponent(Component):
             method="multiply",
         ),
     ]
-    
+
     def multiply(self) -> Data:
         """Multiply two numbers and return the result.
         
@@ -49,16 +49,16 @@ class DFXMultiplyComponent(Component):
             # Get the input values
             num1 = float(self.number1) if self.number1 is not None else 0.0
             num2 = float(self.number2) if self.number2 is not None else 0.0
-            
+
             # Perform multiplication
             result = num1 * num2
-            
+
             # Log the operation
             self.log(f"Multiplying {num1} × {num2} = {result}")
-            
+
             # Set status
             self.status = f"{num1} × {num2} = {result}"
-            
+
             # Return result as Data
             return Data(
                 data={
@@ -68,7 +68,7 @@ class DFXMultiplyComponent(Component):
                     "operation": "multiply",
                 }
             )
-            
+
         except (ValueError, TypeError) as e:
             error_message = f"Error multiplying numbers: {e}"
             self.status = error_message
@@ -80,7 +80,7 @@ class DFXMultiplyComponent(Component):
                     "number2": self.number2,
                 }
             )
-    
+
     def build(self):
         """Return the main multiply function."""
         return self.multiply

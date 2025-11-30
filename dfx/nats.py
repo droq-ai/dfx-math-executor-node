@@ -1,10 +1,8 @@
 """NATS client helper for publishing and consuming messages."""
 
-import asyncio
 import json
 import logging
 import os
-from collections.abc import Callable
 from typing import Any
 
 import nats
@@ -57,7 +55,7 @@ class NATSClient:
             stream_info = await self.js.stream_info(self.stream_name)
             logger.info(f"Stream '{self.stream_name}' already exists")
             logger.info(f"Stream subjects: {stream_info.config.subjects}")
-            
+
             # Check if 'droq.local.public.>' is in subjects, if not, update stream
             required_subject = "droq.local.public.>"
             if required_subject not in stream_info.config.subjects:
@@ -116,7 +114,7 @@ class NATSClient:
             # Encode data as JSON
             payload = json.dumps(data).encode()
             payload_size = len(payload)
-            
+
             logger.info(f"[NATS] Publishing to subject: {full_subject}, payload size: {payload_size} bytes")
 
             # Publish with headers if provided

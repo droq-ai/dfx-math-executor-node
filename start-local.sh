@@ -14,6 +14,10 @@ if ! command -v uv &> /dev/null; then
     exit 1
 fi
 
+# Install local dfx package in editable mode
+echo "📦 Installing local dfx package..."
+uv pip install -e .
+
 # Run the service
 uv run droq-math-executor-node "$PORT"
 
