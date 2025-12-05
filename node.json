@@ -1,7 +1,7 @@
 {
   "node_id": "dfx-math-executor-node",
   "name": "DFX Math Executor Node",
-  "description": "Droqflow node providing components to do math operations",
+  "description": "Droq AI node providing components to do math operations",
   "version": "1.0.0",
   "api_url": "http://localhost:8003",
   "ip_address": "0.0.0.0",
